@@ -1,0 +1,246 @@
+> POST method
+In this method, we can create and send JSON documents to the end point.
+Success status code is 201.
+To create key value pairs we use Map.
+E.g 
+Map<String, Object> map = new HashMap<String, Object>();
+map.put("name", "Jim");
+map.put("job", "teacher");
+System.out.println(map);
+o/p: {name=Jim, job=teacher}
+
+To convert them to JSON objects, we need to add the below dependency in pom.xml:
+<dependency>
+        <groupId>com.googlecode.json-simple</groupId>
+        <artifactId>json-simple</artifactId>
+        <version>1.1.1</version>
+</dependency>
+
+It can be done with json-simple (like we have added) or gson or json.
+
+To convert the map object to a JSON object, we need to do:
+JSONObject request = new JSONObject(map);
+System.out.println(request);
+o/p: {"name":"Jim","job":"teacher"}
+
+If the conversion to json object doesnot happen, we can try:
+System.out.println(request.toJSONString()); 
+
+We can create a json object directly by creating a key,value object from the JSONObject.
+JSONObject request1 = new JSONObject();
+request1.put("name","Chandrima");
+request1.put("job", "Engineer");
+System.out.println(request1);
+o/p: {"name":"Chandrima","job":"Engineer"}
+
+So we have our post body created, now we will test this.
+given()
+        .body(request1.toJSONString())
+        .when()
+        .post("https://reqres.in/api/users")
+        .then()
+        .statusCode(201);  <- 201 is http code for created
+
+
+> The most common headers of Rest API:
+Authorization: Carries credentials containing the authentication information of the client for the resource being requested.
+
+WWW-Authenticate: This is sent by the server if it needs a form of authentication before it can respond with the actual resource being requested. Often sent along with a response code of 401, which means ‘unauthorized’.
+
+Accept-Charset: This is a header which is set with the request and tells the server about which character sets are acceptable by the client.
+
+Content-Type:  Indicates the media type (text/html or text/JSON) of the response sent to the client by the server, this will help the client in processing the response body correctly.
+
+Cache-Control: This is the cache policy defined by the server for this response, a cached response can be stored by the client and re-used till the time defined by the Cache-Control header.
+
+> PUT request
+Put is for updating a resource.
+Returns statusCode 200 on success.
+
+> PATCH request
+For updating resource.
+Returns 200 statusCode on success.
+
+- PUT vs PATCH request
+PUT and PATCH are HTTP verbs and they both relate to updating a resource.
+The main difference between PUT and PATCH requests are in the way the server processes the enclosed entity to modify the resource identified by the Request-URI.
+
+1. In a PUT request, the enclosed entity is considered to be a modified version of the resource stored on the origin server, and the client is requesting that the stored version be replaced.
+With PATCH, however, the enclosed entity contains a set of instructions describing how a resource currently residing on the origin server should be modified to produce a new version.
+2. Another difference is that when you want to update a resource with PUT request, you have to send the full payload as the request whereas with PATCH, you only send the parameters which you want to update.
+
+Suppose we have a resource that holds the first name and last name of a person.
+{ "first": "Michael", "last": "Angelo" }
+If we want to change the first name then we send a PUT request for Update.
+Here, although we are only changing the first name, with PUT request we have to send both parameters first and last. In other words, it is mandatory to send all values again, the full payload.
+When we send a PATCH request, however, we only send the data which we want to update. In other words, we only send the first name to update, no need to send the last name.
+For this reason, PATCH request requires less bandwidth.
+
+> DELETE request
+Deletes a resource
+Returns status code 204 on success.
+
+>> Creating fake Rest API
+Step 1. Install JSON Server
+npm install -g json-server
+Step 2: Start JSON Server
+json-server --watch db.json
+Check localhost:3000 in the browser to see the file created.
+Step 3. Now search for the db.json file created automatically and do your own changes.
+Step 4:. When we go to localhost:3000 and refresh, the changes we made in the document should reflect.
+For details see the db.json document.
+If we want to find the relation between 2 documents:
+http://localhost:3000/doc1/oneOfTheIdValues/doc2
+E.g. http://localhost:3000/subjects/1/users
+
+Also to search something we can write like:
+http://localhost:3000/doc1?key=value
+E.g. http://localhost:3000/subjects?name=Physics
+
+> Accessing the created API and testing it.
+1. GET
+@Test
+    public void testGET() {
+        baseURI = "http://localhost:3000/";
+        given()
+                .get("/users")
+                .then()
+                .statusCode(200);
+
+    }
+
+2. POST
+@Test
+public void testPOST() {
+         baseURI = "http://localhost:3000/";
+
+         JSONObject obj = new JSONObject();
+         obj.put("name", "History");
+         //System.out.println(obj);
+
+         given()
+                 .contentType(ContentType.JSON)
+                 .accept(ContentType.JSON)
+                 .header("Content-Type", "application/json")
+                 .body(obj.toJSONString())
+                 .when()
+                 .post("/subjects")
+                 .then()
+                 .statusCode(201)
+         .log().all();
+     }
+
+3. PATCH
+@Test
+public void testPatch() {
+        baseURI = "http://localhost:3000/";
+
+        JSONObject obj = new JSONObject();
+        obj.put("name", "Biology");     //For PATCH, only the part to be updated needs to be passed
+
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Content-Type", "application/json")
+                .body(obj.toJSONString())
+                .when()
+                .patch("/subjects/3")
+                .then()
+                .statusCode(200)
+                .log().all();
+    }
+
+4. PUT
+@Test
+    public void testPut() {
+        baseURI = "http://localhost:3000/";
+
+        JSONObject obj = new JSONObject();
+        obj.put("id", "4");             //For PUT we need to pass all info
+        obj.put("name", "Stats");
+
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Content-Type", "application/json")
+                .body(obj.toJSONString())
+                .when()
+                .put("/subjects/4")
+                .then()
+                .statusCode(200)
+                .log().all();
+    }
+
+5. DELETE
+ @Test
+    public void testDEL() {
+        baseURI = "http://localhost:3000/";
+
+        when()
+                .delete("/subjects/4")
+                .then()
+                .statusCode(200);
+    }
+
+> PARAMETERIZATION
+
+1. Using DataProvider
+Write a method with @DataProvider(name = "users_data") which will contain all the data that is to be passed to the test.
+DataProvider helps to write data driven tests
+Tests can be run multiple times with different sets of data
+The annotated method is used to return object containing test data
+This test data can be used in actual tests
+
+The test method is passed parameters which will have the values the DataProvider method returns.
+
+@Test(dataProvider = "users_data")
+public void testPOST(String firstName, String lastName, int subjectId) {
+        baseURI = "http://localhost:3000/";
+
+        JSONObject obj = new JSONObject();
+        .
+        .
+        .
+}
+
+Same for delete.
+
+> If we want to put the dataProvider methods in some other class, then we need to make the dataProvider class as parent class and make the test classes inherit from the dataProvider class.
+
+2. Using Parameters
+When there is less data, we need not use dataProvider. Instead we can use Parameter annotation.
+@Parameters("userId")
+@Test
+public void testDELParam(int userId) {
+        baseURI = "http://localhost:3000/";
+
+        when()
+                .delete("/users/"+userId)
+                .then()
+                .statusCode(200);
+}
+
+And we will pass the parameters from testng.xml. We need to install testng xml plugin for that. Then we will pass multiple values in multiple tests:
+<suite name="All Test Suite">
+    <test verbose="2" preserve-order="true" name="test01">
+        <parameter name="userId" value="8"/>
+        <classes>
+            <class name="dataProviderTest"/>
+        </classes>
+    </test>
+    <test name="test1">
+        <parameter name="userId" value="10"/>
+    <classes>
+        <class name="dataProviderTest"/>
+    </classes>
+   </test>
+</suite>
+
+> Data driven testing using Excel
+Step 1: Add the apache poi library in pom.xml file.
+We added the ooxml one to support Microsoft format files.
+Step 2: Create the excel file with proper data.
+Step 3: Create a class and create functions to get row count
+Step 4: Create a fucntion to get data from excel
+Step 5: Create a constructor to get excel path and sheetName
+Step 6: Create a new class and call the excel functions

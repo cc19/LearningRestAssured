@@ -1,0 +1,38 @@
+{
+  "users": [
+    {
+      "firstName": "Rajat",
+      "lastName": "Kapoor",
+      "subjectId": 6,
+      "id": 4
+    },
+    {
+      "firstName": "Pramod",
+      "lastName": "Mathur",
+      "subjectId": 5,
+      "id": 7
+    }
+  ],
+  "subjects": [
+    {
+      "id": 1,
+      "name": "Physics"
+    },
+    {
+      "id": 2,
+      "name": "Arts"
+    },
+    {
+      "id": 3,
+      "name": "Biology"
+    },
+    {
+      "name": "Chemistry",
+      "id": 5
+    },
+    {
+      "name": "History",
+      "id": 6
+    }
+  ]
+}
