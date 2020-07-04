@@ -1,0 +1,9 @@
+Rest Assured is a java library or java api for testing RESTful web services
+Used to test xml, json
+Supports different http methods like POST, GET, PUT, DELETE, PATCH, HEAD< OPTIONS
+Can be integrated with testing frameworks like JUnit, TestNG
+Rest Assured is implemented in Groovy
+We can create tests in BDD using Rest Assured
+
+http://rest-assured.io/ 
+
